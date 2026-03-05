@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financas Gi</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Financas Gi">
+<meta name="theme-color" content="#0f1117">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e8eaf6;min-height:100vh}
+:root{--s:#1a1d2e;--s2:#232740;--ac:#ff6b35;--t2:#9399b2;--br:rgba(255,255,255,0.07)}
+.hdr{background:#1a1d2e;border-bottom:1px solid var(--br);padding:16px 20px 0;position:sticky;top:0;z-index:100}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:#0f1117;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#ff6b35;border:1.5px solid #ff6b35}
+.logo-txt{font-size:18px;font-weight:700}
+.logo-txt span{color:#ff6b35}
+.hdr-date{font-size:12px;color:var(--t2)}
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none;gap:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:10px 16px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.tab.on{color:#ff6b35;border-bottom-color:#ff6b35}
+.sec{display:none;padding:20px;max-width:600px;margin:0 auto;padding-bottom:80px}
+.sec.on{display:block}
+.hero{text-align:center;padding:28px 20px 20px;background:linear-gradient(180deg,#1a1d2e,#0f1117)}
+.hero-lbl{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1px}
+.hero-val{font-size:52px;font-weight:900;color:#ff6b35;line-height:1.05}
+.hero-sub{font-size:13px;color:var(--t2);margin-top:4px}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px}
+.hg-item{background:#1a1d2e;border:1px solid var(--br);border-radius:14px;padding:14px;text-align:center}
+.hg-lbl{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.5px}
+.hg-val{font-size:20px;font-weight:800;margin-top:3px}
+.hg-desc{font-size:10px;color:var(--t2);margin-top:2px}
+.abox{margin:0 20px 16px;background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.3);border-radius:14px;padding:14px 16px;display:flex;gap:10px}
+.abox .txt{font-size:13px;line-height:1.5;color:#ffcdd2}
+.abox .txt b{color:#ff4757}
+.stitle{font-size:15px;font-weight:700;margin-bottom:3px}
+.ssub{font-size:12px;color:var(--t2);margin-bottom:16px}
+.vtable{background:#1a1d2e;border:1px solid var(--br);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.vrow{display:grid;grid-template-columns:1fr auto auto;padding:12px 16px;border-bottom:1px solid var(--br)}
+.vrow:last-child{border-bottom:none}
+.vrow-bank{font-size:14px;font-weight:600}
+.vrow-type{font-size:11px;color:var(--t2);margin-top:2px}
+.vrow-bill{font-size:14px;font-weight:700;text-align:right;margin-right:16px}
+.vrow-due{font-size:13px;font-weight:600;text-align:right}
+.chart-box{background:#1a1d2e;border:1px solid var(--br);border-radius:16px;padding:18px;margin-bottom:20px}
+.cc{border-radius:18px;padding:20px;margin-bottom:14px;overflow:hidden;border:1px solid var(--br)}
+.cc-itau1{background:linear-gradient(135deg,#1a237e,#283593)}
+.cc-itau2{background:linear-gradient(135deg,#1b5e20,#2e7d32)}
+.cc-sant1{background:linear-gradient(135deg,#7f0000,#b71c1c)}
+.cc-sant2{background:linear-gradient(135deg,#4a0000,#c62828)}
+.cc-inter{background:linear-gradient(135deg,#bf360c,#e65100)}
+.cc-top{display:flex;justify-content:space-between;margin-bottom:18px}
+.cc-bank{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.85}
+.cc-type{font-size:11px;opacity:.65;margin-top:2px}
+.cc-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,255,255,.15)}
+.cc-badge.d{background:rgba(255,71,87,.35);color:#ff8a80}
+.cc-badge.w{background:rgba(255,193,7,.3);color:#ffe082}
+.cc-badge.g{background:rgba(76,175,130,.3);color:#a5d6a7}
+.cc-lbl{font-size:12px;opacity:.7;margin-bottom:2px}
+.cc-val{font-size:34px;font-weight:900;line-height:1}
+.cc-due{font-size:12px;opacity:.65;margin-top:4px}
+.cc-bar-row{display:flex;justify-content:space-between;font-size:11px;opacity:.8;margin:14px 0 5px}
+.pbar{height:6px;border-radius:3px;background:rgba(255,255,255,.15);overflow:hidden;margin-bottom:4px}
+.pfill{height:100%;border-radius:3px}
+.pfill.s{background:#4caf82}
+.pfill.w{background:#ffd93d}
+.pfill.d{background:#ff4757}
+.cc-avail{font-size:11px;opacity:.7;text-align:right}
+.cc-charges{font-size:12px;color:#ff8a80;margin-top:8px}
+.cc-foot{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between}
+.cc-foot-lbl{font-size:10px;opacity:.6;text-transform:uppercase;letter-spacing:.4px}
+.cc-foot-val{font-size:14px;font-weight:700;margin-top:2px}
+.inst-sum{background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.25);border-radius:14px;padding:16px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center}
+.is-lbl{font-size:10px;color:var(--t2);text-transform:uppercase}
+.is-val{font-size:20px;font-weight:800;color:#ff6b35;margin-top:3px}
+.icard{background:#1a1d2e;border:1px solid var(--br);border-radius:13px;padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:12px}
+.icard-ico{width:40px;height:40px;border-radius:11px;background:#232740;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.icard-info{flex:1;min-width:0}
+.icard-name{font-size:13px;font-weight:600}
+.icard-tag{font-size:11px;color:var(--t2);margin-top:1px}
+.icard-prow{display:flex;align-items:center;gap:8px;margin-top:5px}
+.icard-pb{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.icard-pbf{height:100%;border-radius:2px;background:#ff6b35}
+.icard-info2{font-size:10px;color:var(--t2);white-space:nowrap}
+.icard-vals{text-align:right;flex-shrink:0}
+.icard-v{font-size:15px;font-weight:700;color:#ff6b35}
+.icard-vt{font-size:10px;color:var(--t2)}
+.stotal{background:#232740;border:1px solid var(--br);border-radius:14px;padding:16px;text-align:center;margin-bottom:18px}
+.stotal-lbl{font-size:11px;color:var(--t2);text-transform:uppercase}
+.stotal-val{font-size:40px;font-weight:900;color:#ff4757}
+.stotal-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.scard{background:#1a1d2e;border:1px solid var(--br);border-radius:13px;padding:13px 15px;margin-bottom:9px;display:flex;align-items:center;gap:12px}
+.scard-ico{width:42px;height:42px;border-radius:11px;background:#232740;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.scard-name{font-size:14px;font-weight:600}
+.scard-detail{font-size:11px;color:var(--t2);margin-top:2px}
+.scard-val{font-size:17px;font-weight:700;margin-left:auto;flex-shrink:0}
+.scard-val.h{color:#ff4757}
+.frow{background:#1a1d2e;border:1px solid var(--br);border-radius:11px;padding:11px 14px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.frow-m{font-size:12px;font-weight:600;width:90px;flex-shrink:0}
+.frow-b{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.frow-bf{height:100%;border-radius:4px;background:linear-gradient(90deg,#ff6b35,#ff9a5c)}
+.frow-v{font-size:13px;font-weight:700;width:80px;text-align:right;flex-shrink:0}
+.strat{background:#1a1d2e;border:1px solid var(--br);border-radius:16px;padding:18px;margin-bottom:14px}
+.strat-title{font-size:14px;font-weight:700;margin-bottom:14px}
+.strat-item{display:flex;gap:11px;margin-bottom:13px;align-items:flex-start}
+.strat-n{width:27px;height:27px;border-radius:8px;background:#ff6b35;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;color:#fff}
+.strat-ttl{font-size:13px;font-weight:600}
+.strat-desc{font-size:12px;color:var(--t2);margin-top:2px;line-height:1.5}
+.goal-box{background:rgba(76,175,130,.12);border:1px solid rgba(76,175,130,.25);border-radius:14px;padding:18px;text-align:center}
+.goal-val{font-size:40px;font-weight:900;color:#4caf82}
+.goal-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.alcard{border-radius:13px;padding:15px;margin-bottom:11px;border:1px solid transparent}
+.alcard.r{background:rgba(255,71,87,.1);border-color:rgba(255,71,87,.25)}
+.alcard.y{background:rgba(255,217,61,.1);border-color:rgba(255,217,61,.25)}
+.alcard.g{background:rgba(76,175,130,.1);border-color:rgba(76,175,130,.25)}
+.alcard-top{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.alcard-ico{font-size:20px}
+.alcard-ttl{font-size:14px;font-weight:700}
+.alcard.r .alcard-ttl{color:#ff8a80}
+.alcard.y .alcard-ttl{color:#ffe082}
+.alcard.g .alcard-ttl{color:#a5d6a7}
+.alcard-body{font-size:13px;color:var(--t2);line-height:1.6}
+.tip{background:rgba(76,175,130,.1);border:1px solid rgba(76,175,130,.2);border-radius:13px;padding:15px;margin-top:10px}
+.tip-ttl{font-size:13px;font-weight:700;color:#4caf82;margin-bottom:8px}
+.tip-row{font-size:12px;color:var(--t2);line-height:1.9}
+.tip-row::before{content:'→ ';color:#4caf82}
+@media(min-width:480px){.hero-grid{grid-template-columns:repeat(4,1fr)}.inst-sum{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="logo">
+      <div class="logo-icon">$</div>
+      <div class="logo-txt">Finanças da <span>Gi</span></div>
+    </div>
+    <div class="hdr-date">Março 2026</div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="go(0)">Resumo</div>
+    <div class="tab" onclick="go(1)">Cartões</div>
+    <div class="tab" onclick="go(2)">Parcelas</div>
+    <div class="tab" onclick="go(3)">Assinaturas</div>
+    <div class="tab" onclick="go(4)">Previsão</div>
+    <div class="tab" onclick="go(5)">Alertas</div>
+  </div>
+</div>
+
+<div class="sec on" id="s0">
+  <div class="hero">
+    <div class="hero-lbl">Total Faturas · Março 2026</div>
+    <div class="hero-val">R$ 32.446</div>
+    <div class="hero-sub">soma dos 5 cartões</div>
+  </div>
+  <div class="hero-grid">
+    <div class="hg-item"><div class="hg-lbl">Comprometido futuro</div><div class="hg-val" style="color:#ff4757">R$ 37.709</div><div class="hg-desc">em parcelas abertas</div></div>
+    <div class="hg-item"><div class="hg-lbl">Parcelas/mês</div><div class="hg-val" style="color:#ffd93d">R$ 10.138</div><div class="hg-desc">já na próx. fatura</div></div>
+    <div class="hg-item"><div class="hg-lbl">Assinaturas</div><div class="hg-val" style="color:#4a90d9">R$ 1.525</div><div class="hg-desc">recorrentes/mês</div></div>
+    <div class="hg-item"><div class="hg-lbl">Juros cobrados</div><div class="hg-val" style="color:#ff4757">R$ 333</div><div class="hg-desc">nesta fatura</div></div>
+  </div>
+  <div style="padding:0 20px 10px">
+    <div class="abox"><div style="font-size:20px">🚨</div><div class="txt"><b>Itaú 9200 estourou o limite!</b> R$ 31.648 usado de R$ 31.570. Santander Adicional: R$ 477 de R$ 500 (95% do limite).</div></div>
+    <div class="stitle">Gráfico por Cartão</div>
+    <div class="ssub">fatura atual de cada cartão</div>
+    <div class="chart-box" style="height:260px"><canvas id="cDonut"></canvas></div>
+    <div class="stitle">Próximos Vencimentos</div>
+    <div class="ssub">em ordem de urgência</div>
+    <div class="vtable">
+      <div class="vrow"><div><div class="vrow-bank">Inter ···5543</div><div class="vrow-type">Mastercard</div></div><div class="vrow-bill">R$ 2.267</div><div class="vrow-due" style="color:#ff4757">10/02 ⚠️</div></div>
+      <div class="vrow"><div><div class="vrow-bank">Itaú ···9200</div><div class="vrow-type">Visa Infinite</div></div><div class="vrow-bill">R$ 16.796</div><div class="vrow-due" style="color:#ff4757">20/02 ⚠️</div></div>
+      <div class="vrow"><div><div class="vrow-bank">Santander ···1041</div><div class="vrow-type">Adicional</div></div><div class="vrow-bill">R$ 477</div><div class="vrow-due" style="color:#ffd93d">01/03</div></div>
+      <div class="vrow"><div><div class="vrow-bank">Itaú ···3321</div><div class="vrow-type">Mastercard</div></div><div class="vrow-bill">R$ 11.827</div><div class="vrow-due" style="color:#ffd93d">01/03</div></div>
+      <div class="vrow"><div><div class="vrow-bank">Santander ···8106</div><div class="vrow-type">Unique</div></div><div class="vrow-bill">R$ 1.079</div><div class="vrow-due" style="color:#4caf82">05/03</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="s1">
+  <div class="cc cc-itau1">
+    <div class="cc-top"><div><div class="cc-bank">Itaú</div><div class="cc-type">Mastercard ···3321</div></div><div class="cc-badge w">⚠️ Encargos</div></div>
+    <div class="cc-lbl">Fatura atual</div><div class="cc-val">R$ 11.827</div><div class="cc-due">Vencimento: 01/03/2026</div>
+    <div class="cc-bar-row"><span>Usado: <b>R$ 26.489</b></span><span>Limite: R$ 26.500</span></div>
+    <div class="pbar"><div class="pfill d" style="width:100%"></div></div>
+    <div class="cc-avail">Disponível: R$ 11,47</div>
+    <div class="cc-charges">⚠️ Juros e multa cobrados: R$ 329,59</div>
+    <div class="cc-foot"><div><div class="cc-foot-lbl">Próx. fatura (parcelas)</div><div class="cc-foot-val">R$ 4.609</div></div><div><div class="cc-foot-lbl">Total futuro parcelado</div><div class="cc-foot-val">R$ 14.455</div></div></div>
+  </div>
+  <div class="cc cc-itau2">
+    <div class="cc-top"><div><div class="cc-bank">Itaú Infinite</div><div class="cc-type">Visa ···9200</div></div><div class="cc-badge d">🚨 Estourado</div></div>
+    <div class="cc-lbl">Fatura atual</div><div class="cc-val">R$ 16.796</div><div class="cc-due">Vencimento: 20/02/2026</div>
+    <div class="cc-bar-row"><span>Usado: <b>R$ 31.648</b></span><span>Limite: R$ 31.570</span></div>
+    <div class="pbar"><div class="pfill d" style="width:100%"></div></div>
+    <div class="cc-avail" style="color:#ff4757">Disponível: –R$ 78 (ESTOURADO)</div>
+    <div class="cc-foot"><div><div class="cc-foot-lbl">Próx. fatura (parcelas)</div><div class="cc-foot-val">R$ 4.056</div></div><div><div class="cc-foot-lbl">Total futuro parcelado</div><div class="cc-foot-val">R$ 14.853</div></div></div>
+  </div>
+  <div class="cc cc-sant1">
+    <div class="cc-top"><div><div class="cc-bank">Santander</div><div class="cc-type">Unique ···8106</div></div><div class="cc-badge g">✓ Normal</div></div>
+    <div class="cc-lbl">Fatura atual</div><div class="cc-val">R$ 1.079</div><div class="cc-due">Vencimento: 05/03/2026</div>
+    <div class="cc-bar-row"><span>Usado: <b>R$ 1.836</b></span><span>Limite: R$ 2.989</span></div>
+    <div class="pbar"><div class="pfill w" style="width:61%"></div></div>
+    <div class="cc-avail">Disponível: R$ 1.153</div>
+    <div class="cc-foot"><div><div class="cc-foot-lbl">Parcelado auto/mês</div><div class="cc-foot-val">R$ 154</div></div><div><div class="cc-foot-lbl">Total futuro</div><div class="cc-foot-val">R$ 1.230</div></div></div>
+  </div>
+  <div class="cc cc-sant2">
+    <div class="cc-top"><div><div class="cc-bank">Santander Adicional</div><div class="cc-type">Unique ···1041</div></div><div class="cc-badge w">⚠️ Quase cheio</div></div>
+    <div class="cc-lbl">Fatura atual</div><div class="cc-val">R$ 477</div><div class="cc-due">Vencimento: 01/03/2026</div>
+    <div class="cc-bar-row"><span>Usado: <b>R$ 477</b></span><span>Limite: R$ 500</span></div>
+    <div class="pbar"><div class="pfill d" style="width:95%"></div></div>
+    <div class="cc-avail">Disponível: R$ 23 — 95% do limite!</div>
+    <div class="cc-foot"><div><div class="cc-foot-lbl">Parcelas futuras</div><div class="cc-foot-val">R$ 0</div></div><div><div class="cc-foot-lbl">Principal gasto</div><div class="cc-foot-val">Apple</div></div></div>
+  </div>
+  <div class="cc cc-inter">
+    <div class="cc-top"><div><div class="cc-bank">Banco Inter</div><div class="cc-type">Mastercard ···5543</div></div><div class="cc-badge w">⚠️ Limite alto</div></div>
+    <div class="cc-lbl">Fatura atual</div><div class="cc-val">R$ 2.267</div><div class="cc-due">Vencimento: 10/02/2026</div>
+    <div class="cc-bar-row"><span>Usado: <b>R$ 9.438</b></span><span>Limite: R$ 10.000</span></div>
+    <div class="pbar"><div class="pfill d" style="width:94%"></div></div>
+    <div class="cc-avail">Disponível: R$ 562</div>
+    <div class="cc-foot"><div><div class="cc-foot-lbl">Próx. fatura (parcelas)</div><div class="cc-foot-val">R$ 1.320</div></div><div><div class="cc-foot-lbl">Total futuro</div><div class="cc-foot-val">R$ 7.171</div></div></div>
+  </div>
+</div>
+
+<div class="sec" id="s2">
+  <div class="stitle">Parcelas em Andamento</div>
+  <div class="ssub">tudo que ainda vai cair nos próximos meses</div>
+  <div class="inst-sum">
+    <div><div class="is-lbl">Total parcelado</div><div class="is-val">R$ 37.709</div></div>
+    <div><div class="is-lbl">Próxima fatura</div><div class="is-val">R$ 10.138</div></div>
+  </div>
+  <div id="plist"></div>
+  <div class="tip">
+    <div class="tip-ttl">💡 Quitar primeiro — maior alívio</div>
+    <div class="tip-row">Instituto Vechi (2 últimas parcelas: R$ 1.018 + R$ 1.649) libera R$ 2.667/mês</div>
+    <div class="tip-row">COOP + LS Comércio (últimas parcelas) — R$ 443/mês com ~R$ 1.200</div>
+    <div class="tip-row">Chirli Wanscher em 2 cartões — R$ 1.893/mês ainda por meses</div>
+  </div>
+</div>
+
+<div class="sec" id="s3">
+  <div class="stitle">Assinaturas Recorrentes</div>
+  <div class="ssub">saem automaticamente todo mês</div>
+  <div class="stotal">
+    <div class="stotal-lbl">Total em assinaturas/mês</div>
+    <div class="stotal-val">R$ 1.525</div>
+    <div class="stotal-sub">R$ 18.300 por ano saindo automático</div>
+  </div>
+  <div id="slist"></div>
+  <div class="tip">
+    <div class="tip-ttl">✂️ O que revisar hoje</div>
+    <div class="tip-row">Apple: R$ 846/mês em múltiplos serviços — consolide no Apple One</div>
+    <div class="tip-row">Netflix cobrada em 2 cartões — possível duplicata (R$ 719/ano)</div>
+    <div class="tip-row">Adobe R$ 320 — existe plano mais barato?</div>
+    <div class="tip-row">ChatGPT R$ 111/mês em dólar — necessário manter?</div>
+  </div>
+</div>
+
+<div class="sec" id="s4">
+  <div class="stitle">Previsão de Queda</div>
+  <div class="ssub">se parar de fazer novos parcelamentos</div>
+  <div class="chart-box" style="height:240px"><canvas id="cLine"></canvas></div>
+  <div id="frows"></div>
+  <div class="strat" style="margin-top:16px">
+    <div class="strat-title">🎯 Estratégia para chegar em R$ 18k</div>
+    <div class="strat-item"><div class="strat-n">1</div><div><div class="strat-ttl">Parar novos parcelamentos</div><div class="strat-desc">Regra: nenhuma compra acima de 3x. Corta o efeito bola de neve no limite.</div></div></div>
+    <div class="strat-item"><div class="strat-n">2</div><div><div class="strat-ttl">Quitar parcelas pequenas</div><div class="strat-desc">COOP + LS Comércio + Kalunga = ~R$ 1.200 para quitar e libera R$ 700/mês.</div></div></div>
+    <div class="strat-item"><div class="strat-n">3</div><div><div class="strat-ttl">Cancelar Apple duplicados</div><div class="strat-desc">R$ 846/mês → reduzir para ~R$ 300 = R$ 546/mês de economia imediata.</div></div></div>
+    <div class="strat-item"><div class="strat-n">4</div><div><div class="strat-ttl">Concentrar gastos no Inter</div><div class="strat-desc">Use só o Inter para o dia a dia. Itaú e Santander só para parcelas existentes.</div></div></div>
+    <div class="strat-item"><div class="strat-n">5</div><div><div class="strat-ttl">Teto para alimentação fora</div><div class="strat-desc">iFood + McDonald's + padaria várias vezes por semana. Teto sugerido: R$ 800/mês.</div></div></div>
+  </div>
+  <div class="goal-box">
+    <div style="font-size:12px;color:var(--t2)">Meta em 6 meses seguindo a estratégia</div>
+    <div class="goal-val">~R$ 18.000</div>
+    <div class="goal-sub">queda de 44% no compromisso mensal</div>
+  </div>
+</div>
+
+<div class="sec" id="s5">
+  <div class="stitle">Alertas Financeiros</div>
+  <div class="ssub">8 pontos de atenção nas suas faturas</div>
+  <div class="alcard r"><div class="alcard-top"><div class="alcard-ico">🚨</div><div class="alcard-ttl">Itaú 9200 — Limite Estourado</div></div><div class="alcard-body">Limite de R$ 31.570 ultrapassado: R$ 31.648 utilizado (–R$ 78 acima). Pode gerar bloqueio e encargos extras. Pague o quanto antes e não use este cartão até regularizar.</div></div>
+  <div class="alcard r"><div class="alcard-top"><div class="alcard-ico">⚠️</div><div class="alcard-ttl">R$ 329 em juros e multa — Itaú 3321</div></div><div class="alcard-body">Cobrados R$ 329,59 (R$ 123 juros rotativos + R$ 141,87 multa + R$ 7 mora + R$ 57 IOF). Houve atraso ou pagamento parcial na fatura anterior. Pague sempre o total.</div></div>
+  <div class="alcard y"><div class="alcard-top"><div class="alcard-ico">⚡</div><div class="alcard-ttl">Santander Adicional — 95% do limite</div></div><div class="alcard-body">R$ 477 de R$ 500 utilizados. Praticamente sem espaço. Não use este cartão até pagar a fatura.</div></div>
+  <div class="alcard y"><div class="alcard-top"><div class="alcard-ico">📺</div><div class="alcard-ttl">Netflix cobrada em 2 cartões</div></div><div class="alcard-body">Netflix R$ 59,90 aparece no Itaú 3321 (19/02) e no Santander 8106 (24/02). Possível duplicata. Cancelar uma = R$ 719/ano de economia.</div></div>
+  <div class="alcard y"><div class="alcard-top"><div class="alcard-ico">🏊</div><div class="alcard-ttl">Chirli Wanscher em 2 cartões</div></div><div class="alcard-body">Parcela de R$ 946,50 ativa no Itaú 3321 (5/10) E no Inter (4/10) = R$ 1.893/mês nessa compra. Verifique se ambos são necessários.</div></div>
+  <div class="alcard y"><div class="alcard-top"><div class="alcard-ico">🍎</div><div class="alcard-ttl">Apple: R$ 846/mês em serviços</div></div><div class="alcard-body">R$ 396 no Santander + R$ 450 no Santander Adicional. Múltiplos planos (iCloud, Arcade, TV+…). Consolide no Apple One (~R$ 100-200/mês).</div></div>
+  <div class="alcard y"><div class="alcard-top"><div class="alcard-ico">✈️</div><div class="alcard-ttl">Passagem Azul — 11 parcelas restantes</div></div><div class="alcard-body">R$ 758,86/mês no Itaú 9200 por mais 11 meses. Total restante: ~R$ 8.347. Considere antecipar se tiver liquidez.</div></div>
+  <div class="alcard g"><div class="alcard-top"><div class="alcard-ico">✅</div><div class="alcard-ttl">Boa notícia: R$ 3.100/mês se liberam em breve!</div></div><div class="alcard-body">Instituto Vechi Itaú 3321 (R$ 1.018), COOP (R$ 223), LS Comércio (R$ 220) e Instituto Vechi 9200 (R$ 1.649) terminam nas próximas 1–2 faturas. São R$ 3.110/mês que se liberam automaticamente!</div></div>
+</div>
+
+<script>
+const instData=[
+  {ico:'🏊',name:'Chirli Wanscher',card:'Itaú 3321',v:946.50,c:5,t:10},
+  {ico:'🏃',name:'Treinamento Personal',card:'Itaú 3321',v:289.00,c:5,t:12},
+  {ico:'😁',name:'Invisalign',card:'Itaú 3321',v:625.20,c:4,t:6},
+  {ico:'👔',name:'Perfil Uniformes',card:'Itaú 3321',v:253.34,c:1,t:3},
+  {ico:'🤿',name:'Subaquática',card:'Itaú 3321',v:684.00,c:1,t:5},
+  {ico:'🏥',name:'Instituto Vechi',card:'Itaú 3321',v:1018.50,c:1,t:2},
+  {ico:'🏃',name:'Treinamento Personal 2',card:'Itaú 3321',v:349.00,c:1,t:6},
+  {ico:'🛒',name:'COOP',card:'Itaú 3321',v:223.34,c:1,t:2},
+  {ico:'👗',name:'LS Comércio',card:'Itaú 3321',v:219.90,c:1,t:2},
+  {ico:'🏥',name:'Clínica Dra. Carol',card:'Itaú 9200',v:403.20,c:5,t:10},
+  {ico:'🏥',name:'Clínica Dra. Carol 2',card:'Itaú 9200',v:399.00,c:5,t:10},
+  {ico:'🏥',name:'Instituto Vechi',card:'Itaú 9200',v:1649.00,c:2,t:3},
+  {ico:'📚',name:'Kalunga',card:'Itaú 9200',v:247.20,c:1,t:2},
+  {ico:'🚴',name:'Decathlon',card:'Itaú 9200',v:598.49,c:1,t:2},
+  {ico:'✈️',name:'Passagem Azul',card:'Itaú 9200',v:758.86,c:1,t:12},
+  {ico:'💳',name:'Parcelado Automático',card:'Santander',v:153.69,c:2,t:10},
+  {ico:'🏊',name:'Chirli Wanscher',card:'Inter',v:946.50,c:4,t:10},
+  {ico:'🏡',name:'Leroy Merlin',card:'Inter',v:373.02,c:2,t:6},
+];
+const subsData=[
+  {ico:'🍎',name:'Apple (vários serviços)',card:'Santander 8106',v:396.49,h:true},
+  {ico:'🍎',name:'Apple (adicional)',card:'Santander Adicional',v:449.80,h:true},
+  {ico:'🎨',name:'Adobe Creative',card:'Santander 8106',v:320.00,h:false},
+  {ico:'🤖',name:'ChatGPT',card:'Itaú 3321',v:111.00,h:false},
+  {ico:'📦',name:'Amazon Prime',card:'Santander 8106',v:83.09,h:false},
+  {ico:'📺',name:'Netflix',card:'Itaú 3321',v:59.90,h:false},
+  {ico:'⚠️',name:'Netflix (duplicada?)',card:'Santander 8106',v:59.90,h:true},
+  {ico:'📱',name:'Google / Instagram',card:'Santander 8106',v:16.99,h:false},
+  {ico:'🏥',name:'SCP Completo',card:'Santander Adicional',v:27.19,h:false},
+];
+const foreData=[
+  {m:'Mar/26',v:10138},{m:'Abr/26',v:6181},{m:'Mai/26',v:5303},
+  {m:'Jun/26',v:5303},{m:'Jul/26',v:4246},{m:'Ago/26',v:2148},
+  {m:'Set/26',v:1202},{m:'Out/26',v:759},{m:'Nov/26+',v:0},
+];
+function fmt(v){return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+document.getElementById('plist').innerHTML=instData.map(d=>{
+  const rem=d.t-d.c,pct=(d.c/d.t)*100,tot=d.v*rem;
+  return`<div class="icard"><div class="icard-ico">${d.ico}</div><div class="icard-info"><div class="icard-name">${d.name}</div><div class="icard-tag">📇 ${d.card}</div><div class="icard-prow"><div class="icard-pb"><div class="icard-pbf" style="width:${pct}%"></div></div><div class="icard-info2">${d.c}/${d.t} · ${rem} restante${rem!=1?'s':''}</div></div></div><div class="icard-vals"><div class="icard-v">${fmt(d.v)}</div><div class="icard-vt">Total: ${fmt(tot)}</div></div></div>`;
+}).join('');
+document.getElementById('slist').innerHTML=subsData.map(s=>`<div class="scard"><div class="scard-ico">${s.ico}</div><div><div class="scard-name">${s.name}</div><div class="scard-detail">📇 ${s.card}</div></div><div class="scard-val ${s.h?'h':''}">${fmt(s.v)}</div></div>`).join('');
+const maxF=Math.max(...foreData.map(f=>f.v));
+document.getElementById('frows').innerHTML=foreData.map(f=>`<div class="frow"><div class="frow-m">${f.m}</div><div class="frow-b"><div class="frow-bf" style="width:${maxF?(f.v/maxF*100):0}%"></div></div><div class="frow-v" style="color:${f.v>7000?'#ff4757':f.v>3000?'#ffd93d':'#4caf82'}">${f.v?'R$'+f.v.toLocaleString('pt-BR'):'R$ 0'}</div></div>`).join('');
+let charted=false;
+function drawCharts(){
+  if(charted)return;charted=true;
+  new Chart(document.getElementById('cDonut').getContext('2d'),{type:'doughnut',data:{labels:['Itaú 3321','Itaú 9200','Santander 8106','Santander 1041','Inter'],datasets:[{data:[11827,16796,1079,477,2267],backgroundColor:['#3949ab','#388e3c','#b71c1c','#c62828','#e65100'],borderColor:'#1a1d2e',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#9399b2',font:{size:11},boxWidth:11,padding:10}},tooltip:{callbacks:{label:c=>` ${c.label}: R$ ${c.parsed.toLocaleString('pt-BR',{minimumFractionDigits:2})}`}}}}});
+  new Chart(document.getElementById('cLine').getContext('2d'),{type:'line',data:{labels:foreData.map(f=>f.m),datasets:[{label:'Parcelas',data:foreData.map(f=>f.v),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,0.1)',borderWidth:2.5,tension:0.4,fill:true,pointBackgroundColor:'#ff6b35',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` R$ ${c.parsed.y.toLocaleString('pt-BR')}`}}},scales:{x:{ticks:{color:'#9399b2',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#9399b2',font:{size:10},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+}
+function go(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.querySelectorAll('.sec').forEach((s,j)=>s.classList.toggle('on',i===j));
+  if(i===0||i===4)setTimeout(drawCharts,80);
+}
+setTimeout(drawCharts,200);
+</script>
+</body>
+</html>
